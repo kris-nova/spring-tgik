@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/kris-nova/spring-tgik:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/kris-nova/spring-tgik:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: spring-tgik
+        chartPath: charts/spring-tgik
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/kris-nova/spring-tgik'
+          image.tag: '{{.DIGEST_HEX}}'
